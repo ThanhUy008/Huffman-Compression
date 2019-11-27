@@ -91,11 +91,12 @@ void sortDic(vector<Dictionary> &dictionary, FreqTable table)
 {
 	for (int i = 0; i < dictionary.size(); i++)
 	{
-		for (int j = 0; j < table._char.size(); i++)
+		for (int j = 0; j < table._char.size(); j++)
 		{
 			if (dictionary[i]._c == table._char[j])
 			{
 				swap(dictionary[i], dictionary[j]);
+				break;
 			}
 		}
 	}
