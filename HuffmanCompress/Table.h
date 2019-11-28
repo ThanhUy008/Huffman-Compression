@@ -17,7 +17,7 @@ struct FreqTable
 vector<HTree*> handleInputFile(char *file, FreqTable &table);
 void creatsaveTree(HTree *in, string &temp);
 
-struct HEADER
+struct TXTHEADER
 {
 	char _type[3];
 	unsigned int _tabsize;
@@ -25,6 +25,6 @@ struct HEADER
 
 	unsigned int _realtextsize;
 	unsigned int _textsize;
-	unsigned char *_text;
 };
-void createtxtHeader(HEADER &header, string tree, vector<Dictionary> diction, FreqTable table);
+void createtxtHeader(TXTHEADER &header, string tree, vector<Dictionary> diction, FreqTable table);
+void disposetable(TXTHEADER &header);

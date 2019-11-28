@@ -39,7 +39,7 @@ void UZIPtxt(char* infile)
 	outFILE = fopen(outfilename.c_str(), "wb+");
 
 	FreqTable freqtable;
-	HEADER header;
+	TXTHEADER header;
 	Dictionary t_dictionary;
 	vector<Dictionary> dictionary;
 
@@ -88,6 +88,7 @@ void UZIPtxt(char* infile)
 			copybyte(binary_value, binary_temp);
 			char c = strtol(binary_value.c_str(), 0, 2);
 			fwrite(&c, sizeof(char), 1, outFILE);
+			emptyfyString(binary_value);
 		}
 
 	}
@@ -99,7 +100,9 @@ void UZIPtxt(char* infile)
 		fwrite(&c, sizeof(char), 1, outFILE);
 	}
 
-
+	fclose(outFILE);
+	depose(root);
+	disposetable(header);
 
 }
 

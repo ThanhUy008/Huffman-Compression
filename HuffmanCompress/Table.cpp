@@ -101,7 +101,7 @@ void sortDic(vector<Dictionary> &dictionary, FreqTable table)
 		}
 	}
 }
-void createtxtHeader(HEADER &header,string tree,vector<Dictionary> diction,FreqTable table)
+void createtxtHeader(TXTHEADER &header,string tree,vector<Dictionary> diction,FreqTable table)
 {
 	//type
 	header._type[0] = 't';
@@ -125,4 +125,9 @@ void createtxtHeader(HEADER &header,string tree,vector<Dictionary> diction,FreqT
 	header._realtextsize = temp;
 	header._textsize = ((temp + 7) / 8) * 8;
 
+}
+
+void disposetable(TXTHEADER & header)
+{
+	delete[] header._table;
 }
