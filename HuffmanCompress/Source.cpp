@@ -6,8 +6,9 @@ void main()
 {
 
 	UZIPtxt("test.txt");
-	string saveTree = readTXTheader("test1.uzip");
+	Decompression("test.uzip");
+	/*string saveTree = readTXTheader("test1.uzip");
 	HTree *newHuffmanTree = NULL;
 	
-	rebuildHuffman(saveTree, newHuffmanTree);
+	rebuildHuffman(saveTree, newHuffmanTree);*/
 }

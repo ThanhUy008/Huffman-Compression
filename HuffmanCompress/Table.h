@@ -20,11 +20,11 @@ void creatsaveTree(HTree *in, string &temp);
 struct TXTHEADER
 {
 	char _type[3];
-	unsigned int _tabsize;
-	unsigned char *_table;
+	string _tabsize;
+	char *_table;
 
-	unsigned int _realtextsize;
-	unsigned int _textsize;
+	string _realtextsize;
+	string _textsize;
 };
 void createtxtHeader(TXTHEADER &header, string tree, vector<Dictionary> diction, FreqTable table);
 void disposetable(TXTHEADER &header);

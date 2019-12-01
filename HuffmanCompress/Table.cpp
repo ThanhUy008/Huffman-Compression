@@ -1,5 +1,5 @@
 #include "Table.h"
-
+#include <string>
 void initDistionary(HTree* huffman, Dictionary &temp, vector<Dictionary> &output)
 {
 	if (huffman != NULL)
@@ -89,41 +89,45 @@ void creatsaveTree(HTree *in, string &temp)
 }
 void sortDic(vector<Dictionary> &dictionary, FreqTable table)
 {
-	for (int i = 0; i < dictionary.size(); i++)
+	for (int i = 0; i < table._char.size(); i++)
 	{
-		for (int j = 0; j < table._char.size(); j++)
+		for (int j = 0; j < dictionary.size(); j++)
 		{
-			if (dictionary[i]._c == table._char[j])
+			if (table._char[i] == dictionary[j]._c)
 			{
 				swap(dictionary[i], dictionary[j]);
-				break;
 			}
 		}
 	}
 }
-void createtxtHeader(TXTHEADER &header,string tree,vector<Dictionary> diction,FreqTable table)
+void createtxtHeader(TXTHEADER &header, string tree, vector<Dictionary> diction, FreqTable table)
 {
 	//type
 	header._type[0] = 't';
 	header._type[1] = 'x';
 	header._type[2] = 't';
 	//table
-	header._tabsize = tree.size();
-	header._table = new unsigned char[header._tabsize];
+	int temp = tree.size();
 
-	for (int i = 0; i < header._tabsize; i++)
+	header._tabsize = to_string(temp);
+	
+	header._table = new  char[temp];
+
+	for (int i = 0; i < temp; i++)
 	{
 		header._table[i] = tree[i];
 	}
 	//text
 	sortDic(diction, table);
-	unsigned int temp = 0;
+	int sum = 0;
 	for (int i = 0; i < diction.size(); i++)
 	{
-		temp += diction[i]._binary.size()*table._freq[i];
+		sum += diction[i]._binary.size()*table._freq[i];
 	}
-	header._realtextsize = temp;
-	header._textsize = ((temp + 7) / 8) * 8;
+
+	header._realtextsize = to_string(sum);
+
+	header._textsize =  to_string(((sum+7)/8)*8);
 
 }
 

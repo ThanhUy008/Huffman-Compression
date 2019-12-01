@@ -35,8 +35,8 @@ void UZIPtxt(char* infile)
 		outfilename.pop_back();
 	outfilename += ".uzip";
 	//create output
-	FILE *outFILE;
-	outFILE = fopen(outfilename.c_str(), "wb+");
+	ofstream outFILE;
+	outFILE.open(outfilename.c_str(),ios::binary);
 
 	FreqTable freqtable;
 	TXTHEADER header;
@@ -54,12 +54,31 @@ void UZIPtxt(char* infile)
 	createtxtHeader(header, saveTree, dictionary, freqtable);
 
 	//write header to outfile
-	if (outFILE == NULL)
+	if (outFILE.fail())
 	{
 		cout << "can't create output";
 		exit(0);
 	}
-	fwrite(&header, sizeof(header), 1, outFILE);
+
+	outFILE.write(header._type, 3);
+
+	outFILE << '/';
+
+	outFILE.write(header._tabsize.c_str(), header._tabsize.size());
+
+	outFILE << '/';
+
+	outFILE.write(header._table, atoi(header._tabsize.c_str()));
+
+	outFILE << '/';
+
+	outFILE.write(header._realtextsize.c_str(), header._realtextsize.size());
+
+	outFILE << '/';
+
+	outFILE.write(header._textsize.c_str(), header._textsize.size());
+
+	outFILE << '/';
 
 	//convert txt
 	string binary_value = "";
@@ -71,7 +90,7 @@ void UZIPtxt(char* infile)
 		exit(0);
 	}
 
-	unsigned char c_temp;
+	char c_temp;
 	while (inFile >> noskipws >> c_temp)
 	{
 		for (int i = 0; i < dictionary.size(); i++)
@@ -87,7 +106,7 @@ void UZIPtxt(char* infile)
 		{
 			copybyte(binary_value, binary_temp);
 			char c = strtol(binary_value.c_str(), 0, 2);
-			fwrite(&c, sizeof(char), 1, outFILE);
+			outFILE.write(&c, 1);
 			emptyfyString(binary_value);
 		}
 
@@ -97,10 +116,11 @@ void UZIPtxt(char* infile)
 		while (binary_temp.size() < 8)
 			binary_temp += '0';
 		char c = strtol(binary_temp.c_str(), 0, 2);
-		fwrite(&c, sizeof(char), 1, outFILE);
+		outFILE.write(&c, 1);
 	}
 
-	fclose(outFILE);
+	inFile.close();
+	outFILE.close();
 	depose(root);
 	disposetable(header);
 
