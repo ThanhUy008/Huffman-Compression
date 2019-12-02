@@ -1,21 +1,27 @@
 #include "Decompress.h"
 #include <bitset>
-
-void reconvert(string &b, char &c, HTree *root, int &i)
+//find char with similar binary value on HTREE
+//if c = NULL then cant find
+//else c is the char need to find
+void reconvert(string &b, char &c, HTree *root, int &i,bool &check)
 {
 	if(b.empty())
 	{
-		c = '#';
+		c = NULL;
+		check = false;
 		return;
 	}
 	if (i > b.size())
 	{
-		c = '#';
+		c = NULL;
+		check = false;
 		return;
 	}
 	if (root->pLeft == NULL && root->pRight == NULL)
 	{
 		c = root->_char;
+		check = true;
+		return;
 	}
 	else
 	{
@@ -23,69 +29,81 @@ void reconvert(string &b, char &c, HTree *root, int &i)
 		if (b[i] == '0')
 		{
 			i++;
-			reconvert(b, c, root->pLeft, i);
+			reconvert(b, c, root->pLeft, i,check);
 		}
 		else
 		{
 			i++;
-			reconvert(b, c, root->pRight, i);
+			reconvert(b, c, root->pRight, i,check);
 		}
 	}
 }
+
 void Decompression(char* infile)
 {
 	ifstream inFILE;
 	
-
-	string outfilename(infile);
-	for (int i = 0; i < 5; i++)
-		outfilename.pop_back();
-	outfilename += "1.txt";
-
-	ofstream outFILE;
-	outFILE.open(outfilename,ios::binary);
-
+	
 	inFILE.open(infile,ios::binary);
 	if (inFILE.fail())
 	{
 		cout << "CANT OPEN UZIP FILE";
 		exit(0);
 	}
-	//lay chu signature txt
-	string rash;
+	//lay chu signature txt, exe,cpp ...;
+	string duoifile;
 	char trash;
 	for (int i = 0; i < 3; i++)
 	{
 		inFILE >> noskipws >> trash;
-		rash.push_back(trash);
+		duoifile.push_back(trash);
 	}
 
-	TXTHEADER header;
-	inFILE >> noskipws >> trash;
+	//remove .uzip in zip file
+	string outfilename(infile);
+	for (int i = 0; i < 5; i++)
+		outfilename.pop_back();
+	
+	//add new .txt, .exe , etc...
+	//TODO : remove the '1' after finish project.
+	outfilename += "1." + duoifile;
 
+	ofstream outFILE;
+	outFILE.open(outfilename, ios::binary);
+
+	
+	TXTHEADER header;
+	
+	//dispose the '/' after signature
+
+	inFILE >> noskipws >> trash;
+	//get huffman tree size
 	while (inFILE.peek() != '/')
 	{
 		char temp;
 		inFILE >> noskipws >> temp;
-		header._tabsize.push_back(temp);
+		header._treesize.push_back(temp);
 	}
 
 	//dipose the last '/'
 	inFILE >> noskipws >> trash;
 
-	int Treesize = atoi(header._tabsize.c_str());
+	//convert string to int
+	int Treesize = atoi(header._treesize.c_str());
 	
+	//get huffman tree
 	string saveTree = "";
 	for (int i = 0; i < Treesize; i++)
 	{
 		char c_char;
-		inFILE.read(&c_char, 1);
+		inFILE >> noskipws >> c_char;
 		saveTree += c_char;
 	}
 	
 	//dipose the last '/'
 	inFILE >> noskipws >> trash;
 
+	//get number of char in file
 	while (inFILE.peek() != '/')
 	{
 		char temp;
@@ -96,36 +114,40 @@ void Decompression(char* infile)
 	//dipose the last '/'
 	inFILE >> noskipws >> trash;
 
-	//while (inFILE.peek() != '/')
-	//{
-	//	char temp;
-	//	inFILE >> noskipws >> temp;
-	//	header._textsize.push_back(temp);
-	//}
-	////dipose the last '/'
-	//inFILE >> noskipws >> trash;
-	//
+	//this does nothing
+	header._tree = NULL;
 
+	//convert string to int
 	int realtextsize = stoi(header._realtextsize);
-//	int textsize = stoi(header._textsize);
+	//rebuild Huffman Tree
 	HTree* root = NULL;
 	rebuildHuffman(saveTree, root);
+	//var to save input char
 	char temp;
+
+	//var to save binary of char after convert
 	string buffer = "";
+	
+	//var to check if enough char
 	int count = 0;
+
 	while (inFILE >> noskipws >> temp)
 	{
-		
+		//convert new added char to binary
 		buffer += bitset<8>(temp).to_string();
 		
-	//	if (count >= realtextsize) break;
+
 		char c_buffer = ' ';
-		while (c_buffer != '#')
+		//after reconvert check will change.
+		//the first init just to make to loop start.
+		bool check = true;
+		while (check)
 		{
 			if (count >= realtextsize) break;
 			int index = 0;
-			reconvert(buffer, c_buffer, root, index);
-			if (c_buffer != '#')
+			
+			reconvert(buffer, c_buffer, root, index,check);
+			if (check)
 			{
 				pop_first_n(buffer, index);
 				outFILE.write(&c_buffer, 1);
@@ -133,35 +155,14 @@ void Decompression(char* infile)
 			}
 		}
 	}
-	//int need_pop = textsize - realtextsize;
-	////TODO : FIX THIS
-	//while (need_pop > 0)
-	//{
-	//	if(!buffer.empty())
-	//	buffer.pop_back();
-	//	need_pop--;
-	//}
 
-	//char c_buffer;
-	//int index = 0;
-	//reconvert(buffer, c_buffer, root, index);
-	//if (c_buffer != '#')
-	//{
-	//	outFILE.write(&c_buffer, 1);
-	//}
-	//outFILE.write(&c_buffer, 1);
+
+	disposetable(header);
+	depose(root);
 	inFILE.close();
 	outFILE.close();
 }
-void pop_first_8(string &b)
-{
-	string temp = "";
-	for (int i = b.size() - 1; i >= 8; i--)
-	{
-		temp += b[i];
-	}
-	b = temp;
-}
+
 void pop_first(string &s)
 {
 	for (int i = 0; i < s.size() - 1; i++)
@@ -170,6 +171,7 @@ void pop_first(string &s)
 	}
 	s.pop_back();
 }
+
 void pop_first_n(string &b, int index)
 {
 
@@ -190,7 +192,7 @@ void rebuildHuffman(string &b, HTree *&root)
 			{
 				root = new HTree;
 				//create root node
-				root->_char = '#';
+				root->_char = NULL;
 				root->_freq = 0;
 				root->pLeft = NULL;
 				root->pRight = NULL;

@@ -9,4 +9,4 @@ void emptyfyString(string &in);
 bool checkenough(string in);
 //des empty
 void copybyte(string &des, string &in);
-void UZIPtxt(char* infile);
+void UZIP(char* infile);

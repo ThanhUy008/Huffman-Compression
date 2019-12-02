@@ -5,7 +5,6 @@
 
 void Decompression(char* infile);
 void pop_first(string &s);
-void reconvert(string &b, char &c, HTree *root, int &i);
-void pop_first_8(string &b);
+void reconvert(string &b, char &c, HTree *root, int &i,int &check);
 void pop_first_n(string &b, int index);
 void rebuildHuffman(string &b, HTree *&root);

@@ -4,7 +4,7 @@ void initDistionary(HTree* huffman, Dictionary &temp, vector<Dictionary> &output
 {
 	if (huffman != NULL)
 	{
-		if (huffman->_char != '#') //if the HTree is have only a character meaning it is the leaf node
+		if (huffman->pLeft == NULL && huffman->pRight == NULL) //if the HTree is have only a character meaning it is the leaf node
 										//so we need to add it binary value to the final distionary
 		{
 			if (temp._binary.size() == 0) //if input string have only 1 digit the huffman tree 'll have only one node
@@ -90,12 +90,12 @@ void creatsaveTree(HTree *in, string &temp)
 	{
 		if (in->pLeft == NULL && in->pRight == NULL)
 		{
-			temp += '1';
-			temp += in->_char;
+			temp.push_back('1');
+			temp.push_back(in->_char);
 		}
 		else
 		{
-			temp += '0';
+			temp.push_back('0');
 			creatsaveTree(in->pLeft, temp);
 
 			creatsaveTree(in->pRight, temp);
@@ -115,22 +115,24 @@ void sortDic(vector<Dictionary> &dictionary, FreqTable table)
 		}
 	}
 }
-void createtxtHeader(TXTHEADER &header, string tree, FreqTable table)
+void createtxtHeader(TXTHEADER &header, string tree, FreqTable table,string duoifile)
 {
-	//type
-	header._type[0] = 't';
-	header._type[1] = 'x';
-	header._type[2] = 't';
-	//table
+	//assign signature
+
+	for (int i = 0; i < duoifile.size() - 1; i++)
+	{
+		header._type[3-i + -1] = duoifile[i];
+	}
+	//huffman tree
 	int temp = tree.size();
 
-	header._tabsize = to_string(temp);
+	header._treesize = to_string(temp);
 	
-	header._table = new  char[temp];
+	header._tree = new  char[temp];
 
 	for (int i = 0; i < temp; i++)
 	{
-		header._table[i] = tree[i];
+		header._tree[i] = tree[i];
 	}
 	//text
 //	sortDic(diction, table);
@@ -150,5 +152,6 @@ void createtxtHeader(TXTHEADER &header, string tree, FreqTable table)
 
 void disposetable(TXTHEADER & header)
 {
-	delete[] header._table;
+	if(header._tree != NULL)
+	delete[] header._tree;
 }

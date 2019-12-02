@@ -26,13 +26,18 @@ void copybyte(string &des, string &in)
 	}
 	in = temp;
 }
-void UZIPtxt(char* infile)
+//can zip every file can be read in binary
+void UZIP(char* infile)
 {
 	ifstream inFile;
 
 	string outfilename(infile);
+	string duoifile = "";
 	for (int i = 0; i < 4; i++)
+	{
+		duoifile += outfilename[outfilename.size() - 1];
 		outfilename.pop_back();
+	}
 	outfilename += ".uzip";
 	//create output
 	ofstream outFILE;
@@ -51,7 +56,7 @@ void UZIPtxt(char* infile)
 
 	initDistionary(root, t_dictionary, dictionary);
 
-	createtxtHeader(header, saveTree, freqtable);
+	createtxtHeader(header, saveTree, freqtable,duoifile);
 
 	//write header to outfile
 	if (outFILE.fail())
@@ -64,11 +69,12 @@ void UZIPtxt(char* infile)
 
 	outFILE << '/';
 
-	outFILE.write(header._tabsize.c_str(), header._tabsize.size());
+	outFILE.write(header._treesize.c_str(), header._treesize.size());
 
 	outFILE << '/';
 
-	outFILE.write(header._table, atoi(header._tabsize.c_str()));
+
+	outFILE.write(header._tree, atoi(header._treesize.c_str()));
 
 	outFILE << '/';
 
@@ -76,11 +82,8 @@ void UZIPtxt(char* infile)
 
 	outFILE << '/';
 
-	//outFILE.write(header._textsize.c_str(), header._textsize.size());
-
-	//outFILE << '/';
-
-	//convert txt
+	sortDic(dictionary, freqtable);
+	//convert all char
 	string binary_value = "";
 	string binary_temp = "";
 	inFile.open(infile,ios::binary);
@@ -102,7 +105,7 @@ void UZIPtxt(char* infile)
 			}
 		}
 
-		if (checkenough(binary_temp))
+		while (checkenough(binary_temp))
 		{
 			copybyte(binary_value, binary_temp);
 			char c = strtol(binary_value.c_str(), 0, 2);
@@ -111,6 +114,7 @@ void UZIPtxt(char* infile)
 		}
 
 	}
+
 	if (binary_temp.size() != 0)
 	{
 		while (binary_temp.size() < 8)

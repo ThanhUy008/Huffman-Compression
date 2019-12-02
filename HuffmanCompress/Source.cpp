@@ -20,9 +20,32 @@ void compare(char* file1, char * file2)
 }
 void main()
 {
+	//UZIP("MTH.exe");
+	Decompression("MTH.uzip");
+	//compare("Text.txt", "Text1.txt");
+	//system("pause");
+	/*
+	cout << "ENTER THING NEED TO COMPRESS" << endl;;
+	
+	string input;
+	getline(cin >> ws, input);
+	char *infile = new char[input.size()];
 
-	UZIPtxt("Text.txt");
-	Decompression("Text.uzip");
-	/*compare("Text.txt", "Text1.txt");
-	system("pause");*/
+	strcpy(infile, input.c_str());
+
+	cout << "COMPRESS OR DECOMPRESS \n 1.compress \n 2.decompress" << endl;
+	int n;
+	cin >> n;
+	switch (n)
+	{
+	case 1:
+		UZIP(infile);
+		break;
+	case 2:
+		Decompression(infile);
+		break;
+	default:
+		break;
+	}
+	delete[] infile;*/
 }

@@ -66,7 +66,7 @@ HTree* add(HTree *p1, HTree *p2)
 {
 	HTree *rel = new HTree;
 	rel->_freq = p1->_freq + p2->_freq;
-	rel->_char = '#';
+	rel->_char = NULL;
 	rel->pLeft = p1;
 	rel->pRight = p2;
 	return rel;
