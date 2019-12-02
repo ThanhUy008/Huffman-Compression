@@ -51,7 +51,7 @@ void UZIPtxt(char* infile)
 
 	initDistionary(root, t_dictionary, dictionary);
 
-	createtxtHeader(header, saveTree, dictionary, freqtable);
+	createtxtHeader(header, saveTree, freqtable);
 
 	//write header to outfile
 	if (outFILE.fail())
@@ -76,14 +76,14 @@ void UZIPtxt(char* infile)
 
 	outFILE << '/';
 
-	outFILE.write(header._textsize.c_str(), header._textsize.size());
+	//outFILE.write(header._textsize.c_str(), header._textsize.size());
 
-	outFILE << '/';
+	//outFILE << '/';
 
 	//convert txt
 	string binary_value = "";
 	string binary_temp = "";
-	inFile.open(infile);
+	inFile.open(infile,ios::binary);
 	if (inFile.fail())
 	{
 		cout << "can't open input";

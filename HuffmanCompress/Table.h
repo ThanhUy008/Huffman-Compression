@@ -24,7 +24,7 @@ struct TXTHEADER
 	char *_table;
 
 	string _realtextsize;
-	string _textsize;
+//	string _textsize;
 };
-void createtxtHeader(TXTHEADER &header, string tree, vector<Dictionary> diction, FreqTable table);
+void createtxtHeader(TXTHEADER &header, string tree, FreqTable table);
 void disposetable(TXTHEADER &header);

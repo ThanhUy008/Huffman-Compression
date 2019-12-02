@@ -42,7 +42,7 @@ vector<HTree*> handleInputFile(char *file, FreqTable &table)
 		exit(0);
 	}
 
-	unsigned char tempchar;
+	char tempchar;
 	while (inFile >> noskipws >> tempchar)
 	{
 
@@ -68,6 +68,21 @@ vector<HTree*> handleInputFile(char *file, FreqTable &table)
 	inFile.close();
 	return tree;
 
+}
+int textSize(HTree *root)
+{
+	if (root == NULL)
+	{
+		return 0;
+	}
+	else if(root->pLeft == NULL && root->pRight == NULL)
+	{
+		return root->_freq;
+	}
+	else
+	{
+		return textSize(root->pLeft) + textSize(root->pRight);
+	}
 }
 void creatsaveTree(HTree *in, string &temp)
 {
@@ -100,7 +115,7 @@ void sortDic(vector<Dictionary> &dictionary, FreqTable table)
 		}
 	}
 }
-void createtxtHeader(TXTHEADER &header, string tree, vector<Dictionary> diction, FreqTable table)
+void createtxtHeader(TXTHEADER &header, string tree, FreqTable table)
 {
 	//type
 	header._type[0] = 't';
@@ -118,16 +133,18 @@ void createtxtHeader(TXTHEADER &header, string tree, vector<Dictionary> diction,
 		header._table[i] = tree[i];
 	}
 	//text
-	sortDic(diction, table);
+//	sortDic(diction, table);
 	int sum = 0;
-	for (int i = 0; i < diction.size(); i++)
+	for (int i = 0; i < table._freq.size(); i++)
 	{
-		sum += diction[i]._binary.size()*table._freq[i];
+
+//		if(table._char[i] != 'ï' && table._char[i] != '»' && table._char[i] != '¿')
+		sum += table._freq[i];
 	}
 
 	header._realtextsize = to_string(sum);
 
-	header._textsize =  to_string(((sum+7)/8)*8);
+//	header._textsize =  to_string(((sum+7)/8)*8);
 
 }
 
