@@ -26,6 +26,103 @@ void copybyte(string &des, string &in)
 	}
 	in = temp;
 }
+void converttobinary(HTree *root, string &binary, int freq)
+{
+	if (binary.size() >= 8)
+	{
+		//TODO: WRITE TO FILE
+		//EMPTY BINARY
+	}
+	if (root == NULL)
+	{
+		return;
+	}
+	else
+	{
+		if (root->pLeft != NULL && root->pRight != NULL)
+		{
+			if (root->pLeft->_freq == freq)
+			{
+				binary += '0';
+			}
+			else if (root->pRight->_freq == freq)
+			{
+				binary += '1';
+			}
+			else
+			{
+				int left = root->pLeft->_freq;
+				int right = root->pRight->_freq;
+
+			}
+		}
+	}
+}
+char binarytochar(string &b)
+{
+	char c;
+	c = c & 0x00;
+	for (int i = 0; i < 8; i++)
+	{
+		if (b[i] == '1')
+		{
+			c ^= 0x01;
+		}
+		if (i != 7) c <<= 1;
+	}
+	b.erase(0, 8);
+	return c;
+}
+string chartobinary(char c)
+{
+	string b = "";
+	for (int i = 0; i < 8; i++)
+	{
+		if ((c & 0x80) == 0x80)
+		{
+			b.push_back('1');
+		}
+		else b.push_back('0');
+	}
+	return b;
+}
+void convertting(vector<Dictionary> dic, char *b, long long n, ofstream &out, FreqTable table, string &binary_temp)
+{
+	int j = 0;
+	string binary_value = "";
+	char *tmp = new char[MAX_BUFFER];
+	for (long long i = 0; i < n; i++)
+	{
+		int k =  char(b[i]) + 128;
+		int pos = table._freq[k];
+
+		binary_temp += dic[pos]._binary;
+
+		while (binary_temp.size() >= 8)
+		{
+			char c = binarytochar(binary_temp);
+			if (j > MAX_BUFFER - 1)
+			{
+				out.write(tmp, j);
+				j = 0;
+				tmp[j] = c;
+				j++;
+			}
+			else
+			{
+				tmp[j] = c;
+				j++;
+			}
+
+		}
+	}
+	if (j != 0)
+	{
+		out.write(tmp, j);
+	}
+	delete[] tmp;
+}
+
 //can zip every file can be read in binary
 void UZIP(char* infile)
 {
@@ -84,7 +181,6 @@ void UZIP(char* infile)
 
 	sortDic(dictionary, freqtable);
 	//convert all char
-	string binary_value = "";
 	string binary_temp = "";
 	inFile.open(infile,ios::binary);
 	if (inFile.fail())
@@ -92,37 +188,39 @@ void UZIP(char* infile)
 		cout << "can't open input";
 		exit(0);
 	}
+	inFile.seekg(0, ios::end);
+	long long length = inFile.tellg();
+	inFile.seekg(0, ios::beg);
 
-	char c_temp;
-	while (inFile >> noskipws >> c_temp)
+	char *c_temp = new char[MAX_BUFFER];
+	while (length > 0)
 	{
-		for (int i = 0; i < dictionary.size(); i++)
+		inFile.read(c_temp, MAX_BUFFER);
+		length -= MAX_BUFFER;
+		long long n;
+		if (length < 0)
 		{
-			if (c_temp == dictionary[i]._c)
-			{
-				binary_temp += dictionary[i]._binary;
-				break;
-			}
+			n = length + MAX_BUFFER;
 		}
-
-		while (checkenough(binary_temp))
+		else
 		{
-			copybyte(binary_value, binary_temp);
-			char c = strtol(binary_value.c_str(), 0, 2);
-			outFILE.write(&c, 1);
-			emptyfyString(binary_value);
+			n = MAX_BUFFER;
 		}
+		convertting(dictionary, c_temp, n, outFILE,freqtable,binary_temp);
+		
 
 	}
-
+	delete[] c_temp;
 	if (binary_temp.size() != 0)
 	{
 		while (binary_temp.size() < 8)
-			binary_temp += '0';
-		char c = strtol(binary_temp.c_str(), 0, 2);
-		outFILE.write(&c, 1);
+		{
+			binary_temp.push_back('0');
+		}
+		char c = binarytochar(binary_temp);
+		outFILE << c;
 	}
-
+	
 	inFile.close();
 	outFILE.close();
 	depose(root);

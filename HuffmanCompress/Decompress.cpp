@@ -17,28 +17,85 @@ void reconvert(string &b, char &c, HTree *root, int &i,bool &check)
 		check = false;
 		return;
 	}
-	if (root->pLeft == NULL && root->pRight == NULL)
+	if (root != NULL)
 	{
-		c = root->_char;
-		check = true;
-		return;
-	}
-	else
-	{
-		
-		if (b[i] == '0')
+		if (root->pLeft == NULL && root->pRight == NULL)
 		{
-			i++;
-			reconvert(b, c, root->pLeft, i,check);
+			c = root->_char;
+			check = true;
+			return;
 		}
 		else
 		{
-			i++;
-			reconvert(b, c, root->pRight, i,check);
+
+			if (b[i] == '0')
+			{
+				i++;
+				reconvert(b, c, root->pLeft, i, check);
+			}
+			else
+			{
+				i++;
+				reconvert(b, c, root->pRight, i, check);
+			}
 		}
 	}
 }
+string chartostring(char c)
+{
+	string rel = "";
+	for (int i = 0; i < 8; i++) {
+		if ((c && 0x80) == 0x80)
+		{
+			rel.push_back('1');		
+		}
+		else rel.push_back('0');
+	}
+	return rel;
+}
+void convert(HTree *root,char *c, int n,int &count,int realtextsize, ofstream &fout, string &buffer)
+{
+	char *output = new char[MAX_BUFFER];
+	int j = 0;
+	for (int i = 0; i < n; i++)
+	{
+		buffer += bitset<8>(c[i]).to_string();
+		char c_buffer = ' ';
+		//after reconvert check will change.
+		//the first init just to make to loop start.
+		bool check = true;
+		while (check)
+		{
+			if (count >= realtextsize) break;
+			int index = 0;
 
+			reconvert(buffer, c_buffer, root, index, check);
+			if (check)
+			{
+				buffer.erase(0, index);
+				count++;
+				if (j > MAX_BUFFER - 1)
+				{
+					fout.write(output, MAX_BUFFER);
+					j = 0;
+					output[j] = c_buffer;
+					j++;
+				}
+				else
+				{
+					output[j] = c_buffer;
+					j++;
+				}
+				
+			}
+		}
+	}
+	if (j != 0)
+	{
+		fout.write(output, j);
+	}
+	delete[] output;
+}
 void Decompression(char* infile)
 {
 	ifstream inFILE;
@@ -50,6 +107,10 @@ void Decompression(char* infile)
 		cout << "CANT OPEN UZIP FILE";
 		exit(0);
 	}
+	char *tmp = new char[MAX_BUFFER];
+	inFILE.seekg(0, ios::end);
+	long long length = inFILE.tellg();
+	inFILE.seekg(0, ios::beg);
 	//lay chu signature txt, exe,cpp ...;
 	string duoifile;
 	char trash;
@@ -93,13 +154,11 @@ void Decompression(char* infile)
 	
 	//get huffman tree
 	string saveTree = "";
-	for (int i = 0; i < Treesize; i++)
+	for(int i = 0 ; i < Treesize ;i++)
 	{
-		char c_char;
-		inFILE >> noskipws >> c_char;
-		saveTree += c_char;
+		inFILE >> noskipws >> trash;
+		saveTree.push_back(trash);
 	}
-	
 	//dipose the last '/'
 	inFILE >> noskipws >> trash;
 
@@ -131,31 +190,20 @@ void Decompression(char* infile)
 	//var to check if enough char
 	int count = 0;
 
-	while (inFILE >> noskipws >> temp)
+	while (length > 0)
 	{
-		//convert new added char to binary
-		buffer += bitset<8>(temp).to_string();
+		inFILE.read(tmp, MAX_BUFFER);
+		length -= MAX_BUFFER;
+		int n;
+		if (length < 0) n = MAX_BUFFER + length;
+		else n = MAX_BUFFER;
+
+		convert(root, tmp, n, count, realtextsize, outFILE, buffer);
+	
+
 		
-
-		char c_buffer = ' ';
-		//after reconvert check will change.
-		//the first init just to make to loop start.
-		bool check = true;
-		while (check)
-		{
-			if (count >= realtextsize) break;
-			int index = 0;
-			
-			reconvert(buffer, c_buffer, root, index,check);
-			if (check)
-			{
-				pop_first_n(buffer, index);
-				outFILE.write(&c_buffer, 1);
-				count++;
-			}
-		}
 	}
-
+	delete[] tmp;
 
 	disposetable(header);
 	depose(root);
@@ -197,7 +245,7 @@ void rebuildHuffman(string &b, HTree *&root)
 				root->pLeft = NULL;
 				root->pRight = NULL;
 				//remove '0' in the string
-				pop_first(b);
+				b.erase(0, 1);
 
 				rebuildHuffman(b, root->pLeft);
 
@@ -212,8 +260,7 @@ void rebuildHuffman(string &b, HTree *&root)
 				root->_char = b[1];
 				root->_freq = 0;
 				//remove '1' in the string and a character right after it
-				pop_first(b);
-				pop_first(b);
+				b.erase(0, 2);
 				//jump to node right
 			}
 		}

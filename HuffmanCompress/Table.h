@@ -1,5 +1,6 @@
 #pragma once
 #include "Huffman.h"
+#define MAX_BUFFER 1024*1024*4
 struct Dictionary
 {
 	char _c;
@@ -27,5 +28,5 @@ struct TXTHEADER
 //	string _textsize;
 };
 void createtxtHeader(TXTHEADER &header, string tree, FreqTable table,string duoifile);
-void sortDic(vector<Dictionary> &dictionary, FreqTable table);
+void sortDic(vector<Dictionary> &dictionary, FreqTable &table);
 void disposetable(TXTHEADER &header);

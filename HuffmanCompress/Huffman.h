@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <fstream>
+#include <bitset>
 using namespace std;
 
 struct HTree

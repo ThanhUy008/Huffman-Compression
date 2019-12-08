@@ -31,6 +31,24 @@ void initDistionary(HTree* huffman, Dictionary &temp, vector<Dictionary> &output
 		}
 	}
 }
+void createFreqTable(FreqTable &out)
+{
+	for (int i = 0; i < 256; i++)
+	{
+		char temp = char(i - 128);
+		out._char.push_back(temp);
+		out._freq.push_back(0);
+	}
+}
+void takecare(char *b, long long n, FreqTable &out)
+{
+	for (long long i = 0; i < n; i++)
+	{
+		int k = char(b[i]) + 128;
+		out._freq[k]++;
+	}
+}
+
 vector<HTree*> handleInputFile(char *file, FreqTable &table)
 {
 	vector<HTree*> tree;
@@ -41,29 +59,39 @@ vector<HTree*> handleInputFile(char *file, FreqTable &table)
 		cout << "cant open file";
 		exit(0);
 	}
+	inFile.seekg(0, ios::end);
+	long long length = inFile.tellg();
+	inFile.seekg(0, ios::beg);
+	//TODO: check if 1024*1024 work
+	createFreqTable(table);
+	char *tempchar = new char[MAX_BUFFER];
 
-	char tempchar;
-	while (inFile >> noskipws >> tempchar)
+	while (length > 0)
 	{
-
-		int k = findchar(table._char, tempchar);
-		if (k == -1)
+		inFile.read(tempchar, MAX_BUFFER);
+		length -= MAX_BUFFER;
+		long long n;
+		if (length < 0)
 		{
-			table._char.push_back(tempchar);
-			table._freq.push_back(1);
+			n = length + MAX_BUFFER;
 		}
 		else
 		{
-			table._freq[k]++;
+			n = MAX_BUFFER;
 		}
-		
+		takecare(tempchar, n, table);
 	}
+	delete[] tempchar;
+
 	for (int i = 0; i < table._freq.size(); i++)
 	{
 		HTree *temp;
 		initTree(temp);
-		push(temp, table._char[i], table._freq[i]);
-		tree.push_back(temp);
+		if (table._freq[i] != 0)
+		{
+			push(temp, table._char[i], table._freq[i]);
+			tree.push_back(temp);
+		}
 	}
 	inFile.close();
 	return tree;
@@ -102,15 +130,19 @@ void creatsaveTree(HTree *in, string &temp)
 		}
 	}
 }
-void sortDic(vector<Dictionary> &dictionary, FreqTable table)
+void sortDic(vector<Dictionary> &dictionary, FreqTable &table)
 {
 	for (int i = 0; i < table._char.size(); i++)
 	{
-		for (int j = 0; j < dictionary.size(); j++)
+		if (table._freq[i] != 0)
 		{
-			if (table._char[i] == dictionary[j]._c)
+			for (int j = 0; j < dictionary.size(); j++)
 			{
-				swap(dictionary[i], dictionary[j]);
+				if (table._char[i] == dictionary[j]._c)
+				{
+					table._freq[i] = j;
+					break;
+				}
 			}
 		}
 	}
@@ -135,17 +167,16 @@ void createtxtHeader(TXTHEADER &header, string tree, FreqTable table,string duoi
 		header._tree[i] = tree[i];
 	}
 	//text
-//	sortDic(diction, table);
+
 	int sum = 0;
 	for (int i = 0; i < table._freq.size(); i++)
 	{
 
-//		if(table._char[i] != 'ï' && table._char[i] != '»' && table._char[i] != '¿')
 		sum += table._freq[i];
 	}
 
 	header._realtextsize = to_string(sum);
-
+	//TODO: CHECK TO COMPRESS FOLDER
 //	header._textsize =  to_string(((sum+7)/8)*8);
 
 }
