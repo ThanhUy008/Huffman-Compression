@@ -22,11 +22,27 @@ void creatsaveTree(HTree *in, string &temp);
 struct TXTHEADER
 {
 	char _type[3];
+	string _filename;
 	string _treesize;
 	char *_tree;
 
+	string _numberofcharaftercompress;
 	string _realtextsize;
 	string _textsize;
+};
+
+struct FILESAVE
+{
+	bool isFoler;
+
+	string name;
+};
+
+struct FOLDERHEADER
+{
+	char _type[3];
+	string _foldername;
+	string _numberoffile;
 };
 void createtxtHeader(TXTHEADER &header, string tree, vector<Dictionary> dic,string duoifile);
 void sortDic(vector<Dictionary> &dictionary, FreqTable &table);

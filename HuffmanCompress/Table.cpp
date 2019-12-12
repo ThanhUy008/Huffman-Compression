@@ -184,9 +184,15 @@ void createtxtHeader(TXTHEADER &header, string tree, vector<Dictionary> dic,stri
 	//check if there is spare char, meaning the binary value if not % 8 = 0, so we will add another char to the end of file
 
 	if (bisum % 8 != 0)
+	{
 		header._textsize = to_string(1);
+		header._numberofcharaftercompress = to_string((bisum / 8) + 1);
+	}
 	else
+	{
+		header._numberofcharaftercompress = to_string((bisum / 8));
 		header._textsize = to_string(0);
+	}
 
 }
 

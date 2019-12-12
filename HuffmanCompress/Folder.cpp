@@ -45,15 +45,14 @@ string getFolderName(string dir)
 	reverse(result.begin(), result.end());
 	return result;
 }
-void read_directory(string name, vector<vector<string>> & v)
+void read_directory(string name, vector<FILESAVE> & v)
 {
-	vector<string> vectemp;
-	string foldername = getFolderName(name);
-	vectemp.push_back(foldername);
-	
-	string tempfolder(name);
+	FILESAVE filesave;
+	string curfoldername = getFolderName(name);
+	filesave.isFoler = true;
+	filesave.name = curfoldername;
 
-	vector<string> folderinside;
+	v.push_back(filesave);
 
 	std::string pattern(name);
 	pattern.append("\\*");
@@ -66,22 +65,24 @@ void read_directory(string name, vector<vector<string>> & v)
 			string temp = (data.cFileName);
 			if (!isTrash(temp))
 			{
-				if (checkiffolder(temp))
+				if (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 				{
-					tempfolder += '\\' + temp;
-					read_directory(tempfolder,v);
+					filesave.isFoler = true;
+					filesave.name = temp;
 				}
-				
-				vectemp.push_back(temp);
+				else
+				{
+					filesave.isFoler = false;
+					filesave.name = temp;
+				}
+				v.push_back(filesave);
 			}
 		} while (FindNextFileA(hFind, &data) != 0);
 
 
-
 		FindClose(hFind);
 	}
-	if(!vectemp.empty())
-	v.push_back(vectemp);
+	
 
 
 }

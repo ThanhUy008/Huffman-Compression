@@ -3,7 +3,8 @@
 #include "Compression.h"
 #include "Decompress.h"
 #include "Folder.h"
-
+#include <direct.h>
+#define DIR_SAMPLE "C:\\Users\\User\\Desktop"
 void PrintHeader()
 {
 	cout << "       _________                                            |  " << endl;
@@ -25,7 +26,7 @@ int EvalueStrInPut(string in)
 		return 1;
 	if (in == "Decompress")
 		return 2;
-	if(in == "Exit")
+	if (in == "Exit") return 0;
 	return 0;
 }
 
@@ -48,10 +49,13 @@ void Decompress(string in)
 		cout << "ENTER FILE NAME " << endl;
 		cin >> filename;
 		UZJFileDecompress(filename);
+		cout << "COMPLETED" << endl;
 		break;
 	case 2:
-		cout << "NOT AVAILABLE AT THE MOMENT" << endl;
-		break;
+		cout << "ENTER FILE NAME " << endl;
+		cin >> filename;
+		FolderDecompress(filename);
+		cout << "COMPLETED" << endl;
 	case 0:
 		return;
 	}
@@ -60,6 +64,9 @@ void Decompress(string in)
 void Compress(string in)
 {
 	char filename[1024];
+
+	vector<FILESAVE> temp;
+
 	int n = EvalueStr(in);
 	switch (n)
 	{
@@ -67,14 +74,21 @@ void Compress(string in)
 		cout << "ENTER FILE NAME " << endl;
 		cin >> filename;
 		UZJtext(filename);
+		cout << "COMPRESS COMPLETED " << endl;
 		break;
 	case 2:
-		cout << "NOT AVAILABLE AT THE MOMENT" << endl;
+		cout << "ENTER PATH NAME, REMEMBER, PATH MUST LOOK LIKE THIS  < C:\\User\\Desktop > " << endl;
+		cin >> filename;
+		read_directory(filename, temp);
+		FolderCompress(temp, filename);
+		cout << "COMPRESS COMPLETED " << endl;
 		break;
 	case 0:
 		return;
 	}
 }
+
+
 
 void main()
 {
@@ -99,7 +113,7 @@ void main()
 			Decompress(in);
 			break;
 		case 0:
-			exit(0);
+			break;
 		default:
 			break;
 		}
@@ -108,5 +122,6 @@ void main()
 		cin >> wantmore;
 
 	} while (wantmore);
-	
+
+	system("pause");
 }

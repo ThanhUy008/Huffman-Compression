@@ -9,5 +9,6 @@
 #include <codecvt>
 using namespace std;
 
-void read_directory(string name, vector<vector<string>> & v);
+void read_directory(string name, vector<FILESAVE> & v);
+string getFolderName(string dir);
 

@@ -1,5 +1,8 @@
 #include "Decompress.h"
 #include <bitset>
+
+#define DIR_SAMPLE "C:\\Users\\User\\Desktop"
+#define SAVE_THE_PATH "\\"
 //find char with similar binary value on HTREE
 //if c = NULL then cant find
 //else c is the char need to find
@@ -98,6 +101,275 @@ void convert(HTree *root,char *c, int n,int &count,int realtextsize, ofstream &f
 }
 
 
+bool ISFOLDER(char sig[])
+{
+	if ((sig[0] == 'f' && sig[1] == 'o' && sig[2] == 'l')) return true;
+	return false;
+}
+
+void FileDecompress(istream &fin,char sig[3],string dir)
+{
+
+
+	//lay chu signature txt, exe,cpp ...;
+	string duoifile = "";
+	duoifile.push_back(sig[0]);
+	duoifile.push_back(sig[1]);
+	duoifile.push_back(sig[2]);
+	char trash;
+
+
+	string filename;
+
+	while (fin.peek() != '/')
+	{
+		fin >> noskipws >> trash;
+		filename.push_back(trash);
+	}
+
+	
+
+	//remove .uzj in zip file
+	string outfilename(filename);
+	for (int i = 0; i < 4; i++)
+		outfilename.pop_back();
+
+	//add new .txt, .exe , etc...
+	//name it again
+	outfilename = dir + "\\" + outfilename +  "-decompress." + duoifile;
+
+	ofstream outFILE;
+	outFILE.open(outfilename, ios::binary);
+
+
+	TXTHEADER header;
+
+	//dispose the '/' after signature
+
+	fin >> noskipws >> trash;
+	//get huffman tree size
+	while (fin.peek() != '/')
+	{
+		char temp;
+		fin >> noskipws >> temp;
+		header._treesize.push_back(temp);
+	}
+
+	//dipose the last '/'
+	fin >> noskipws >> trash;
+
+	//convert string to int
+	int Treesize = atoi(header._treesize.c_str());
+
+	//get huffman tree
+	string saveTree = "";
+	for (int i = 0; i < Treesize; i++)
+	{
+		fin >> noskipws >> trash;
+		saveTree.push_back(trash);
+	}
+	//dipose the last '/'
+	fin >> noskipws >> trash;
+
+	//get number of char in file
+	while (fin.peek() != '/')
+	{
+		char temp;
+		fin >> noskipws >> temp;
+		header._realtextsize.push_back(temp);
+	}
+
+	//dipose the last '/'
+	fin >> noskipws >> trash;
+
+	//get the text size
+	while (fin.peek() != '/')
+	{
+		char temp;
+		fin >> noskipws >> temp;
+		header._textsize.push_back(temp);
+	}
+
+	//dipose the last '/'
+	fin >> noskipws >> trash;
+
+	//get the length
+	while (fin.peek() != '/')
+	{
+		char temp;
+		fin >> noskipws >> temp;
+		header._numberofcharaftercompress.push_back(temp);
+	}
+
+	//dipose the last '/'
+	fin >> noskipws >> trash;
+
+	//this does nothing
+	header._tree = NULL;
+
+	//convert string to int
+	int realtextsize = stoi(header._realtextsize);
+	int textsize = stoi(header._textsize);
+
+	//rebuild Huffman Tree
+	HTree* root = NULL;
+	rebuildHuffman(saveTree, root);
+
+	saveTree.clear();
+
+	//var to save input char
+	char temp;
+
+	//var to save binary of char after convert
+	string buffer = "";
+
+	//var to check if enough char
+	int count = 0;
+	//loop until end of file
+	int length = stoi(header._numberofcharaftercompress);
+	int MAX = length / 2 + 1;
+	char *tmp = new char[MAX];
+	while (length > 0)
+	{
+		length -= MAX;
+		int n;
+		if (length < 0) n = MAX + length;
+		else n = MAX;
+		fin.read(tmp, n);
+		convert(root, tmp, n, count, realtextsize, outFILE, buffer);
+	}
+	buffer.clear();
+	delete[] tmp;
+
+
+	//if there is a spare char, remove it
+
+
+
+	header._treesize.clear();
+	
+	disposetable(header);
+	depose(root);
+	
+	outFILE.close();
+}
+
+void ReCruteFolderDecompress(istream &fin,string dir)
+{
+	char trash;
+	string foldername;
+	string numberoffile = "";
+	char sig[3];
+	while (fin.peek() != '/')
+	{
+		fin >> noskipws >> trash;
+		foldername.push_back(trash);
+	}
+	//dispose the last /
+	fin >> noskipws >> trash;
+
+	while (fin.peek() != '/')
+	{
+		fin >> noskipws >> trash;
+		numberoffile.push_back(trash);
+	}
+	//dispose the last /
+	fin >> noskipws >> trash;
+
+	dir = dir + SAVE_THE_PATH + foldername;
+	mkdir(dir.c_str());
+
+	int n = stoi(numberoffile);
+	for (int j = 0; j < n; j++)
+	{
+		for (int i = 0; i < 3; i++)
+		{
+			fin >> noskipws >> sig[i];
+		}
+		if (ISFOLDER(sig))
+		{
+			ReCruteFolderDecompress(fin, dir);
+		}
+		else
+		{
+			FileDecompress(fin, sig,dir);
+		}
+	}
+
+}
+
+
+//get the file name first
+void FolderDecompress(char *infile)
+{
+	
+	ifstream fin(infile,ios::binary);
+	if (!fin) exit(0);
+	
+	char sig[3];
+	for (int i = 0; i < 3; i++)
+	{
+		fin >> noskipws >> sig[i];
+	}
+	if (!ISFOLDER(sig))
+	{
+		exit(0);
+	}
+	else
+	{
+		
+
+		char trash;
+		string foldername;
+		string numberoffile = "";
+
+		while (fin.peek() != '/')
+		{
+			fin >> noskipws >> trash;
+			foldername.push_back(trash);
+		}
+		//dispose the last /
+		fin >> noskipws >> trash;
+
+		while (fin.peek() != '/')
+		{
+			fin >> noskipws >> trash;
+			numberoffile.push_back(trash);
+		}
+		//dispose the last /
+		fin >> noskipws >> trash;
+
+
+		int n = stoi(numberoffile);
+		//make the path to folder
+		string dir = DIR_SAMPLE;
+		dir += "\\" + foldername;
+
+		//create folder
+		mkdir(dir.c_str());
+
+		for (int i = 0; i < n; i++)
+		{
+			//get signature
+			for (int j = 0; j < 3; j++)
+			{
+				fin >> noskipws >> sig[j];
+			}
+			//if it is folder , get it in folder recruttion
+			if (ISFOLDER(sig))
+			{
+				ReCruteFolderDecompress(fin, dir);
+			}
+			else
+			{//if not, compress it like a normal file
+				FileDecompress(fin, sig,dir);
+			}
+
+		}
+
+	}
+
+}
 
 void UZJFileDecompress(char* infile)
 {
@@ -141,7 +413,7 @@ void UZJFileDecompress(char* infile)
 	
 	//dispose the '/' after signature
 
-	inFILE >> noskipws >> trash;
+//	inFILE >> noskipws >> trash;
 	//get huffman tree size
 	while (inFILE.peek() != '/')
 	{
@@ -183,6 +455,17 @@ void UZJFileDecompress(char* infile)
 		char temp;
 		inFILE >> noskipws >> temp;
 		header._textsize.push_back(temp);
+	}
+
+	//dipose the last '/'
+	inFILE >> noskipws >> trash;
+
+	//get the length
+	while (inFILE.peek() != '/')
+	{
+		char temp;
+		inFILE >> noskipws >> temp;
+		header._numberofcharaftercompress.push_back(temp);
 	}
 
 	//dipose the last '/'
