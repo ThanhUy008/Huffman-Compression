@@ -3,9 +3,9 @@
 #include "Huffman.h"
 #include "Table.h"
 
-void Decompression(char* infile);
+void UZJFileDecompress(char* infile);
+void reconvert(string &b, char &c, HTree *root, int &i, bool &check);
 void pop_first(string &s);
-void reconvert(string &b, char &c, HTree *root, int &i, int &check);
 void pop_first_n(string &b, int index);
 void rebuildHuffman(string &b, HTree *&root);
 void reconvert(string &b, char &c, HTree *root, int &i, bool &check);

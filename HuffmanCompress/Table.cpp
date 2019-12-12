@@ -12,6 +12,7 @@ void initDistionary(HTree* huffman, Dictionary &temp, vector<Dictionary> &output
 				temp._binary += '0';
 			}
 			temp._c = huffman->_char; //this is to know which character binary value is
+			temp._charfreq = huffman->_freq; // get the freq
 			output.push_back(temp); // add it in the final distionary
 			temp._binary.pop_back(); //clean the last value of stack so we can continue DFS
 		}
@@ -33,6 +34,7 @@ void initDistionary(HTree* huffman, Dictionary &temp, vector<Dictionary> &output
 }
 void createFreqTable(FreqTable &out)
 {
+	//create a table contain 256 char with the freq of 0
 	for (int i = 0; i < 256; i++)
 	{
 		char temp = char(i - 128);
@@ -40,15 +42,19 @@ void createFreqTable(FreqTable &out)
 		out._freq.push_back(0);
 	}
 }
+
 void takecare(char *b, long long n, FreqTable &out)
 {
 	for (long long i = 0; i < n; i++)
 	{
+		// if buffer[i] exist, add the 1 to the freq of it
 		int k = char(b[i]) + 128;
 		out._freq[k]++;
 	}
 }
 
+
+//create the freqtable to create huffman tree
 vector<HTree*> handleInputFile(char *file, FreqTable &table)
 {
 	vector<HTree*> tree;
@@ -59,10 +65,12 @@ vector<HTree*> handleInputFile(char *file, FreqTable &table)
 		cout << "cant open file";
 		exit(0);
 	}
+
+	//get length of file
 	inFile.seekg(0, ios::end);
 	long long length = inFile.tellg();
 	inFile.seekg(0, ios::beg);
-	//TODO: check if 1024*1024 work
+	
 	createFreqTable(table);
 	char *tempchar = new char[MAX_BUFFER];
 
@@ -83,11 +91,12 @@ vector<HTree*> handleInputFile(char *file, FreqTable &table)
 	}
 	delete[] tempchar;
 
+	//create the very first node of huffman tree
 	for (int i = 0; i < table._freq.size(); i++)
 	{
 		HTree *temp;
 		initTree(temp);
-		if (table._freq[i] != 0)
+		if (table._freq[i] != 0) // if exist in file, create that node
 		{
 			push(temp, table._char[i], table._freq[i]);
 			tree.push_back(temp);
@@ -97,21 +106,8 @@ vector<HTree*> handleInputFile(char *file, FreqTable &table)
 	return tree;
 
 }
-int textSize(HTree *root)
-{
-	if (root == NULL)
-	{
-		return 0;
-	}
-	else if(root->pLeft == NULL && root->pRight == NULL)
-	{
-		return root->_freq;
-	}
-	else
-	{
-		return textSize(root->pLeft) + textSize(root->pRight);
-	}
-}
+
+//create string to save huffman tree to decompress
 void creatsaveTree(HTree *in, string &temp)
 {
 	if (in != NULL)
@@ -130,6 +126,9 @@ void creatsaveTree(HTree *in, string &temp)
 		}
 	}
 }
+
+//write the position of char in dictionary to freq of FreqTable
+//to make the finding binary value faster
 void sortDic(vector<Dictionary> &dictionary, FreqTable &table)
 {
 	for (int i = 0; i < table._char.size(); i++)
@@ -147,7 +146,10 @@ void sortDic(vector<Dictionary> &dictionary, FreqTable &table)
 		}
 	}
 }
-void createtxtHeader(TXTHEADER &header, string tree, FreqTable table,string duoifile)
+
+
+
+void createtxtHeader(TXTHEADER &header, string tree, vector<Dictionary> dic,string duoifile)
 {
 	//assign signature
 
@@ -169,15 +171,22 @@ void createtxtHeader(TXTHEADER &header, string tree, FreqTable table,string duoi
 	//text
 
 	int sum = 0;
-	for (int i = 0; i < table._freq.size(); i++)
+	unsigned long bisum = 0;
+	for (int i = 0; i < dic.size(); i++)
 	{
 
-		sum += table._freq[i];
+		sum += dic[i]._charfreq;
+		bisum += dic[i]._charfreq *dic[i]._binary.size();
 	}
 
 	header._realtextsize = to_string(sum);
-	//TODO: CHECK TO COMPRESS FOLDER
-//	header._textsize =  to_string(((sum+7)/8)*8);
+
+	//check if there is spare char, meaning the binary value if not % 8 = 0, so we will add another char to the end of file
+
+	if (bisum % 8 != 0)
+		header._textsize = to_string(1);
+	else
+		header._textsize = to_string(0);
 
 }
 

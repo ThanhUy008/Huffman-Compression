@@ -1,17 +1,6 @@
 #include "Compression.h"
 
-void emptyfyString(string &in)
-{
-	while (!in.empty())
-	{
-		in.pop_back();
-	}
-}
-bool checkenough(string in)
-{
-	if (in.size() < 8) return false;
-	return true;
-}
+
 //des empty
 void copybyte(string &des, string &in)
 {
@@ -26,38 +15,7 @@ void copybyte(string &des, string &in)
 	}
 	in = temp;
 }
-void converttobinary(HTree *root, string &binary, int freq)
-{
-	if (binary.size() >= 8)
-	{
-		//TODO: WRITE TO FILE
-		//EMPTY BINARY
-	}
-	if (root == NULL)
-	{
-		return;
-	}
-	else
-	{
-		if (root->pLeft != NULL && root->pRight != NULL)
-		{
-			if (root->pLeft->_freq == freq)
-			{
-				binary += '0';
-			}
-			else if (root->pRight->_freq == freq)
-			{
-				binary += '1';
-			}
-			else
-			{
-				int left = root->pLeft->_freq;
-				int right = root->pRight->_freq;
-
-			}
-		}
-	}
-}
+//convert binary value to char
 char binarytochar(string &b)
 {
 	char c;
@@ -73,6 +31,9 @@ char binarytochar(string &b)
 	b.erase(0, 8);
 	return c;
 }
+
+//convert char to binary value
+
 string chartobinary(char c)
 {
 	string b = "";
@@ -86,6 +47,9 @@ string chartobinary(char c)
 	}
 	return b;
 }
+
+//convert all char in buffer to the suitable binary value acording to huffman
+//convert tha binary value to char and write it to file
 void convertting(vector<Dictionary> dic, char *b, long long n, ofstream &out, FreqTable table, string &binary_temp)
 {
 	int j = 0;
@@ -93,14 +57,16 @@ void convertting(vector<Dictionary> dic, char *b, long long n, ofstream &out, Fr
 	char *tmp = new char[MAX_BUFFER];
 	for (long long i = 0; i < n; i++)
 	{
+		//find the positon of char in dictionnary
 		int k =  char(b[i]) + 128;
 		int pos = table._freq[k];
-
+		//get the binary value
 		binary_temp += dic[pos]._binary;
 
 		while (binary_temp.size() >= 8)
 		{
 			char c = binarytochar(binary_temp);
+			//if buffer is full, write it to outfile and then re use the buffer again
 			if (j > MAX_BUFFER - 1)
 			{
 				out.write(tmp, j);
@@ -116,6 +82,7 @@ void convertting(vector<Dictionary> dic, char *b, long long n, ofstream &out, Fr
 
 		}
 	}
+	//if buffer isn't empty, write it to outfile
 	if (j != 0)
 	{
 		out.write(tmp, j);
@@ -123,45 +90,8 @@ void convertting(vector<Dictionary> dic, char *b, long long n, ofstream &out, Fr
 	delete[] tmp;
 }
 
-//can zip every file can be read in binary
-void UZIP(char* infile)
+void writeheadertofile(TXTHEADER header,ostream &outFILE)
 {
-	ifstream inFile;
-
-	string outfilename(infile);
-	string duoifile = "";
-	for (int i = 0; i < 4; i++)
-	{
-		duoifile += outfilename[outfilename.size() - 1];
-		outfilename.pop_back();
-	}
-	outfilename += ".uzip";
-	//create output
-	ofstream outFILE;
-	outFILE.open(outfilename.c_str(),ios::binary);
-
-	FreqTable freqtable;
-	TXTHEADER header;
-	Dictionary t_dictionary;
-	vector<Dictionary> dictionary;
-
-	vector<HTree*> leafnode = handleInputFile(infile, freqtable);
-	HTree* root = creatHuffmanTree(leafnode);
-
-	string saveTree = "";
-	creatsaveTree(root, saveTree);
-
-	initDistionary(root, t_dictionary, dictionary);
-
-	createtxtHeader(header, saveTree, freqtable,duoifile);
-
-	//write header to outfile
-	if (outFILE.fail())
-	{
-		cout << "can't create output";
-		exit(0);
-	}
-
 	outFILE.write(header._type, 3);
 
 	outFILE << '/';
@@ -179,21 +109,74 @@ void UZIP(char* infile)
 
 	outFILE << '/';
 
+	outFILE.write(header._textsize.c_str(), header._textsize.size());
+
+	outFILE << '/';
+}
+
+//can zip every file can be read in binary
+void UZJtext(char* infile)
+{
+	ifstream inFile;
+
+	string outfilename(infile);
+	string duoifile = "";
+	//remove the .cpp, .txt , ...
+	for (int i = 0; i < 4; i++)
+	{
+		duoifile += outfilename[outfilename.size() - 1];
+		outfilename.pop_back();
+	}
+	outfilename += ".uzj";
+	//create output
+	ofstream outFILE;
+	outFILE.open(outfilename.c_str(),ios::binary);
+
+	FreqTable freqtable;
+	TXTHEADER header;
+	Dictionary t_dictionary;
+	vector<Dictionary> dictionary;
+	//build huffman tree
+	vector<HTree*> leafnode = handleInputFile(infile, freqtable);
+	HTree* root = creatHuffmanTree(leafnode);
+
+	//create a string to save huffman tree to decompress
+	string saveTree = "";
+	creatsaveTree(root, saveTree);
+
+	//create dictionary
+	initDistionary(root, t_dictionary, dictionary);
+
+	//write the position of char in in dictionary to freqtable
 	sortDic(dictionary, freqtable);
-	//convert all char
+
+	createtxtHeader(header, saveTree, dictionary,duoifile);
+
+	//write header to outfile
+	if (outFILE.fail())
+	{
+		cout << "can't create output";
+		exit(0);
+	}
+
+	writeheadertofile(header, outFILE);
+	
+	
 	string binary_temp = "";
+	
 	inFile.open(infile,ios::binary);
 	if (inFile.fail())
 	{
 		cout << "can't open input";
 		exit(0);
 	}
+	//get the length of file
 	inFile.seekg(0, ios::end);
 	long long length = inFile.tellg();
 	inFile.seekg(0, ios::beg);
 
 	char *c_temp = new char[MAX_BUFFER];
-	while (length > 0)
+	while (length > 0) // loop until eof
 	{
 		inFile.read(c_temp, MAX_BUFFER);
 		length -= MAX_BUFFER;
@@ -211,6 +194,9 @@ void UZIP(char* infile)
 
 	}
 	delete[] c_temp;
+	 
+	//if there is a spare binary value that is not enough 8 bit, add '0' until it reach 8
+	//then write the last char to outfile
 	if (binary_temp.size() != 0)
 	{
 		while (binary_temp.size() < 8)

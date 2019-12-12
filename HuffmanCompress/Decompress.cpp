@@ -41,18 +41,10 @@ void reconvert(string &b, char &c, HTree *root, int &i,bool &check)
 		}
 	}
 }
-string chartostring(char c)
-{
-	string rel = "";
-	for (int i = 0; i < 8; i++) {
-		if ((c && 0x80) == 0x80)
-		{
-			rel.push_back('1');		
-		}
-		else rel.push_back('0');
-	}
-	return rel;
-}
+
+//convert char to binary value
+
+//convert char to binary value and then from that binary value find the suitable char from huffman tree.
 void convert(HTree *root,char *c, int n,int &count,int realtextsize, ofstream &fout, string &buffer)
 {
 	char *output = new char[MAX_BUFFER];
@@ -72,17 +64,23 @@ void convert(HTree *root,char *c, int n,int &count,int realtextsize, ofstream &f
 			reconvert(buffer, c_buffer, root, index, check);
 			if (check)
 			{
+				//remove binary value of the char we have found
 				buffer.erase(0, index);
+				//consider finding another char
 				count++;
-				if (j > MAX_BUFFER - 1)
+				if (j > MAX_BUFFER - 1) //if buffer is full
 				{
+					//write it out
 					fout.write(output, MAX_BUFFER);
+					//reset j
 					j = 0;
+					//rewrite the buffer 
 					output[j] = c_buffer;
 					j++;
 				}
 				else
 				{
+					//write newly found char to buffer
 					output[j] = c_buffer;
 					j++;
 				}
@@ -90,13 +88,18 @@ void convert(HTree *root,char *c, int n,int &count,int realtextsize, ofstream &f
 			}
 		}
 	}
+	//if the buffer isn't empty
+	//write it to output
 	if (j != 0)
 	{
 		fout.write(output, j);
 	}
 	delete[] output;
 }
-void Decompression(char* infile)
+
+
+
+void UZJFileDecompress(char* infile)
 {
 	ifstream inFILE;
 	
@@ -114,20 +117,21 @@ void Decompression(char* infile)
 	//lay chu signature txt, exe,cpp ...;
 	string duoifile;
 	char trash;
+	//remove the .uzj
 	for (int i = 0; i < 3; i++)
 	{
 		inFILE >> noskipws >> trash;
 		duoifile.push_back(trash);
 	}
 
-	//remove .uzip in zip file
+	//remove .uzj in zip file
 	string outfilename(infile);
-	for (int i = 0; i < 5; i++)
+	for (int i = 0; i < 4; i++)
 		outfilename.pop_back();
 	
 	//add new .txt, .exe , etc...
-	//TODO : remove the '1' after finish project.
-	outfilename += "1." + duoifile;
+	//name it again
+	outfilename += "-decompress." + duoifile;
 
 	ofstream outFILE;
 	outFILE.open(outfilename, ios::binary);
@@ -173,11 +177,24 @@ void Decompression(char* infile)
 	//dipose the last '/'
 	inFILE >> noskipws >> trash;
 
+	//get the text size
+	while (inFILE.peek() != '/')
+	{
+		char temp;
+		inFILE >> noskipws >> temp;
+		header._textsize.push_back(temp);
+	}
+
+	//dipose the last '/'
+	inFILE >> noskipws >> trash;
+
 	//this does nothing
 	header._tree = NULL;
 
 	//convert string to int
 	int realtextsize = stoi(header._realtextsize);
+	int textsize = stoi(header._textsize);
+
 	//rebuild Huffman Tree
 	HTree* root = NULL;
 	rebuildHuffman(saveTree, root);
@@ -189,7 +206,7 @@ void Decompression(char* infile)
 	
 	//var to check if enough char
 	int count = 0;
-
+	//loop until end of file
 	while (length > 0)
 	{
 		inFILE.read(tmp, MAX_BUFFER);
@@ -199,11 +216,17 @@ void Decompression(char* infile)
 		else n = MAX_BUFFER;
 
 		convert(root, tmp, n, count, realtextsize, outFILE, buffer);
-	
-
 		
 	}
 	delete[] tmp;
+
+
+	//if there is a spare char, remove it
+	
+	if (textsize != 0)
+	{
+		inFILE >> noskipws >> trash;
+	}
 
 	disposetable(header);
 	depose(root);
@@ -211,25 +234,7 @@ void Decompression(char* infile)
 	outFILE.close();
 }
 
-void pop_first(string &s)
-{
-	for (int i = 0; i < s.size() - 1; i++)
-	{
-		s[i] = s[i + 1];
-	}
-	s.pop_back();
-}
 
-void pop_first_n(string &b, int index)
-{
-
-	string temp = "";
-	for (int i = index ; i < b.size(); i++)
-	{
-		temp += b[i];
-	}
-	b = temp;
-}
 void rebuildHuffman(string &b, HTree *&root)
 {
 	if (root == NULL)

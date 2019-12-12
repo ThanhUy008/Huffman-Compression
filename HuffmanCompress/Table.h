@@ -4,6 +4,7 @@
 struct Dictionary
 {
 	char _c;
+	int _charfreq;
 	string _binary;
 };
 
@@ -25,8 +26,8 @@ struct TXTHEADER
 	char *_tree;
 
 	string _realtextsize;
-//	string _textsize;
+	string _textsize;
 };
-void createtxtHeader(TXTHEADER &header, string tree, FreqTable table,string duoifile);
+void createtxtHeader(TXTHEADER &header, string tree, vector<Dictionary> dic,string duoifile);
 void sortDic(vector<Dictionary> &dictionary, FreqTable &table);
 void disposetable(TXTHEADER &header);
