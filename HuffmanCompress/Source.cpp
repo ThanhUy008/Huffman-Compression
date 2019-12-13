@@ -41,21 +41,22 @@ int EvalueStr(string in)
 
 void Decompress(string in)
 {
-	char filename[1024];
+	string filename;
 	int n = EvalueStr(in);
 	switch (n)
 	{
 	case 1:
 		cout << "ENTER FILE NAME " << endl;
-		cin >> filename;
-		UZJFileDecompress(filename);
+		getline(cin >>  ws,filename);
+		UZJFileDecompress((char*)filename.c_str());
 		cout << "COMPLETED" << endl;
 		break;
 	case 2:
 		cout << "ENTER FILE NAME " << endl;
-		cin >> filename;
-		FolderDecompress(filename);
+		getline(cin >> ws, filename);
+		FolderDecompress((char*)filename.c_str());
 		cout << "COMPLETED" << endl;
+		break;
 	case 0:
 		return;
 	}
@@ -63,7 +64,7 @@ void Decompress(string in)
 
 void Compress(string in)
 {
-	char filename[1024];
+	string filename;
 
 	vector<FILESAVE> temp;
 
@@ -72,13 +73,13 @@ void Compress(string in)
 	{
 	case 1:
 		cout << "ENTER FILE NAME " << endl;
-		cin >> filename;
-		UZJtext(filename);
+		getline(cin >> ws, filename);
+		UZJtext((char*)filename.c_str());
 		cout << "COMPRESS COMPLETED " << endl;
 		break;
 	case 2:
 		cout << "ENTER PATH NAME, REMEMBER, PATH MUST LOOK LIKE THIS  < C:\\User\\Desktop > " << endl;
-		cin >> filename;
+		getline(cin >> ws, filename);
 		read_directory(filename, temp);
 		FolderCompress(temp, filename);
 		cout << "COMPRESS COMPLETED " << endl;
@@ -113,7 +114,7 @@ void main()
 			Decompress(in);
 			break;
 		case 0:
-			break;
+			return;
 		default:
 			break;
 		}
@@ -123,5 +124,5 @@ void main()
 
 	} while (wantmore);
 
-	system("pause");
+
 }

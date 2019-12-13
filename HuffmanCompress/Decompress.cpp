@@ -100,6 +100,7 @@ void convert(HTree *root,char *c, int n,int &count,int realtextsize, ofstream &f
 	delete[] output;
 }
 
+//check if signarture of a folder
 
 bool ISFOLDER(char sig[])
 {

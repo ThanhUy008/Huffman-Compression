@@ -6,10 +6,17 @@
 #include <iostream>
 #include <vector>
 #include <stdlib.h>
-void emptyfyString(string &in);
-bool checkenough(string in);
+
+//
+
+
+//compress a folder
 void FolderCompress(vector<FILESAVE> v, string dir);
+//compress file in folder
 void filecompress(char* infile, ofstream &outFILE, string filename);
 //des empty
-void copybyte(string &des, string &in);
+//
+
+
+//compress single folder
 void UZJtext(char* infile);

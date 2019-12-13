@@ -7,7 +7,7 @@ struct Dictionary
 	int _charfreq;
 	string _binary;
 };
-
+//set the char with a suitable binary value from huffman tree
 void initDistionary(HTree* huffman, Dictionary &temp, vector<Dictionary> &output);
 
 struct FreqTable
@@ -15,8 +15,10 @@ struct FreqTable
 	vector<int> _freq;
 	vector<char> _char;
 };
-
+//get the freq of all char in file input
 vector<HTree*> handleInputFile(char *file, FreqTable &table);
+
+//create a string to save huffman tree after compress
 void creatsaveTree(HTree *in, string &temp);
 
 struct TXTHEADER
@@ -44,6 +46,10 @@ struct FOLDERHEADER
 	string _foldername;
 	string _numberoffile;
 };
+
+//create the header file
 void createtxtHeader(TXTHEADER &header, string tree, vector<Dictionary> dic,string duoifile);
+//set the postion of char in dictionary to freqtable
 void sortDic(vector<Dictionary> &dictionary, FreqTable &table);
+
 void disposetable(TXTHEADER &header);
