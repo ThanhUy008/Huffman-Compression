@@ -42,6 +42,7 @@ int EvalueStr(string in)
 void Decompress(string in)
 {
 	string filename;
+	string desdir;
 	int n = EvalueStr(in);
 	switch (n)
 	{
@@ -53,8 +54,10 @@ void Decompress(string in)
 		break;
 	case 2:
 		cout << "ENTER FILE NAME " << endl;
-		getline(cin >> ws, filename);
-		FolderDecompress((char*)filename.c_str());
+		getline(cin >> ws, filename);	
+		cout << "ENTER DIR TO DECOMPRESS NAME " << endl;
+		getline(cin >> ws, desdir);
+		FolderDecompress((char*)filename.c_str(),desdir);
 		cout << "COMPLETED" << endl;
 		break;
 	case 0:

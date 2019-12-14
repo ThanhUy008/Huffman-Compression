@@ -12,4 +12,4 @@ void reconvert(string &b, char &c, HTree *root, int &i, bool &check);
 //rebuild the huffman tree
 void rebuildHuffman(string &b, HTree *&root);
 //compress a folder
-void FolderDecompress(char *infile);
+void FolderDecompress(char *infile,string desdir);

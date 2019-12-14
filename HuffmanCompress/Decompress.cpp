@@ -277,7 +277,7 @@ void ReCruteFolderDecompress(istream &fin,string dir)
 	//dispose the last /
 	fin >> noskipws >> trash;
 
-	dir = dir + SAVE_THE_PATH + foldername;
+	dir = dir + "\\" + foldername;
 	mkdir(dir.c_str());
 
 	int n = stoi(numberoffile);
@@ -301,7 +301,7 @@ void ReCruteFolderDecompress(istream &fin,string dir)
 
 
 //get the file name first
-void FolderDecompress(char *infile)
+void FolderDecompress(char *infile,string desdir)
 {
 	
 	ifstream fin(infile,ios::binary);
@@ -343,8 +343,8 @@ void FolderDecompress(char *infile)
 
 		int n = stoi(numberoffile);
 		//make the path to folder
-		string dir = DIR_SAMPLE;
-		dir += "\\" + foldername;
+		string dir = desdir + "\\" + foldername;
+
 
 		//create folder
 		mkdir(dir.c_str());
