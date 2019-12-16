@@ -1,6 +1,26 @@
 #include "Compression.h"
 
 
+string findDuoifile(string &in)
+{
+	string result = "";
+	for (int i = in.size() - 1; i >= 0; i--)
+	{
+		if (in[i] == '.')
+		{
+			in.pop_back();
+			break;
+		}
+		else
+		{
+			result.push_back(in[i]);
+			in.pop_back();
+		}
+	}
+	reverse(result.begin(), result.end());
+	return result;
+}
+
 //des empty
 void copybyte(string &des, string &in)
 {
@@ -178,13 +198,9 @@ void filecompress(char* infile, ofstream &outFILE, string filename)
 	ifstream inFile;
 
 	string outfilename(infile);
-	string duoifile = "";
-	//remove the .cpp, .txt , ...
-	for (int i = 0; i < 4; i++)
-	{
-		duoifile += outfilename[outfilename.size() - 1];
-		outfilename.pop_back();
-	}
+
+	string duoifile = findDuoifile(outfilename);
+	
 	outfilename += ".uzj";
 	
 
@@ -284,13 +300,7 @@ void UZJtext(char* infile)
 	ifstream inFile;
 
 	string outfilename(infile);
-	string duoifile = "";
-	//remove the .cpp, .txt , ...
-	for (int i = 0; i < 4; i++)
-	{
-		duoifile += outfilename[outfilename.size() - 1];
-		outfilename.pop_back();
-	}
+	string duoifile = findDuoifile(outfilename);
 	outfilename += ".uzj";
 	//create output
 	ofstream outFILE;

@@ -152,11 +152,15 @@ void sortDic(vector<Dictionary> &dictionary, FreqTable &table)
 void createtxtHeader(TXTHEADER &header, string tree, vector<Dictionary> dic,string duoifile)
 {
 	//assign signature
+	if (duoifile.size() < 3)
+		while (duoifile.size() < 3)
+			duoifile.push_back('#');
 
-	for (int i = 0; i < duoifile.size() - 1; i++)
-	{
-		header._type[3-i + -1] = duoifile[i];
-	}
+	header._type[0] = duoifile[0];
+
+	header._type[1] = duoifile[1];
+
+	header._type[2] = duoifile[2];
 	//huffman tree
 	int temp = tree.size();
 

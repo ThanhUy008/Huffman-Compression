@@ -3,9 +3,22 @@
 
 #define DIR_SAMPLE "C:\\Users\\User\\Desktop"
 #define SAVE_THE_PATH "\\"
+
+void checkduoifile(string &in)
+{
+	for (int i = in.size() - 1; i >= 0 ; i--)
+	{
+		if (in[i] == '#') in.pop_back();
+	}
+}
+
+
 //find char with similar binary value on HTREE
 //if c = NULL then cant find
 //else c is the char need to find
+
+
+
 void reconvert(string &b, char &c, HTree *root, int &i,bool &check)
 {
 	if(b.empty())
@@ -118,7 +131,7 @@ void FileDecompress(istream &fin,char sig[3],string dir)
 	duoifile.push_back(sig[1]);
 	duoifile.push_back(sig[2]);
 	char trash;
-
+	checkduoifile(duoifile);
 
 	string filename;
 
@@ -132,7 +145,7 @@ void FileDecompress(istream &fin,char sig[3],string dir)
 
 	//remove .uzj in zip file
 	string outfilename(filename);
-	for (int i = 0; i < 4; i++)
+	for (int i = 0; i < duoifile.size() + 1; i++)
 		outfilename.pop_back();
 
 	//add new .txt, .exe , etc...
@@ -390,12 +403,13 @@ void UZJFileDecompress(char* infile)
 	//lay chu signature txt, exe,cpp ...;
 	string duoifile;
 	char trash;
-	//remove the .uzj
+
 	for (int i = 0; i < 3; i++)
 	{
 		inFILE >> noskipws >> trash;
 		duoifile.push_back(trash);
 	}
+	checkduoifile(duoifile);
 
 	//remove .uzj in zip file
 	string outfilename(infile);
