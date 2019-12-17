@@ -70,7 +70,9 @@ vector<HTree*> handleInputFile(char *file, FreqTable &table)
 	inFile.seekg(0, ios::end);
 	long long length = inFile.tellg();
 	inFile.seekg(0, ios::beg);
-	
+
+
+
 	createFreqTable(table);
 	char *tempchar = new char[MAX_BUFFER];
 

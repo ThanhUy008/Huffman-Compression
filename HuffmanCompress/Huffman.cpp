@@ -140,5 +140,7 @@ HTree* creatHuffmanTree(vector<HTree*> &in)
 		addresult = add(p1, p2);
 		in.push_back(addresult);
 	}
+	if(!in.empty())
 	return in[0];
+	else return NULL;
 }

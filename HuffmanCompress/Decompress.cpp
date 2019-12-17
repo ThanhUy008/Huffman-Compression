@@ -397,9 +397,7 @@ void UZJFileDecompress(char* infile)
 		exit(0);
 	}
 	char *tmp = new char[MAX_BUFFER];
-	inFILE.seekg(0, ios::end);
-	long long length = inFILE.tellg();
-	inFILE.seekg(0, ios::beg);
+	long long length = 0;
 	//lay chu signature txt, exe,cpp ...;
 	string duoifile;
 	char trash;
@@ -493,6 +491,8 @@ void UZJFileDecompress(char* infile)
 	int realtextsize = stoi(header._realtextsize);
 	int textsize = stoi(header._textsize);
 
+
+	length = textsize + realtextsize;
 	//rebuild Huffman Tree
 	HTree* root = NULL;
 	rebuildHuffman(saveTree, root);

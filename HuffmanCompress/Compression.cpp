@@ -304,7 +304,7 @@ void UZJtext(char* infile)
 	outfilename += ".uzj";
 	//create output
 	ofstream outFILE;
-	outFILE.open(outfilename.c_str(),ios::binary);
+
 
 	FreqTable freqtable;
 	TXTHEADER header;
@@ -313,6 +313,8 @@ void UZJtext(char* infile)
 	//build huffman tree
 	vector<HTree*> leafnode = handleInputFile(infile, freqtable);
 	HTree* root = creatHuffmanTree(leafnode);
+
+	outFILE.open(outfilename.c_str(), ios::binary);
 
 	//create a string to save huffman tree to decompress
 	string saveTree = "";
