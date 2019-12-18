@@ -25,6 +25,7 @@ struct TXTHEADER
 {
 	char _type[3];
 	string _filename;
+	string _duoifile;
 	string _treesize;
 	char *_tree;
 

@@ -154,10 +154,13 @@ void sortDic(vector<Dictionary> &dictionary, FreqTable &table)
 void createtxtHeader(TXTHEADER &header, string tree, vector<Dictionary> dic,string duoifile)
 {
 	//assign signature
+
+	header._duoifile = duoifile;
+
 	if (duoifile.size() < 3)
 		while (duoifile.size() < 3)
 			duoifile.push_back('#');
-
+	
 	header._type[0] = duoifile[0];
 
 	header._type[1] = duoifile[1];

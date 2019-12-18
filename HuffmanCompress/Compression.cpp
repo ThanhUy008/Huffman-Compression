@@ -1,6 +1,17 @@
 #include "Compression.h"
 
 
+void checkfilename(string &in)
+{
+	string rel = "";
+	for (int i = in.size() - 1; i >= 0; i--)
+	{
+		if (in[i] == '\\') break;
+		else rel.push_back(in[i]);
+	}
+	in = rel;
+}
+
 string findDuoifile(string &in)
 {
 	string result = "";
@@ -122,6 +133,10 @@ void writeheadertofile(TXTHEADER header,ostream &outFILE)
 		outFILE << '/';
 
 	}
+
+	outFILE.write(header._duoifile.c_str(), header._duoifile.size());
+
+	outFILE << '/';
 
 	outFILE.write(header._treesize.c_str(), header._treesize.size());
 

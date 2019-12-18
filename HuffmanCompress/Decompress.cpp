@@ -124,43 +124,52 @@ bool ISFOLDER(char sig[])
 void FileDecompress(istream &fin,char sig[3],string dir)
 {
 
-
+	TXTHEADER header;
 	//lay chu signature txt, exe,cpp ...;
 	string duoifile = "";
-	duoifile.push_back(sig[0]);
-	duoifile.push_back(sig[1]);
-	duoifile.push_back(sig[2]);
+
 	char trash;
-	checkduoifile(duoifile);
+	
 
 	string filename;
-
+	//get file name
 	while (fin.peek() != '/')
 	{
 		fin >> noskipws >> trash;
 		filename.push_back(trash);
 	}
 
+	//dispose the '/' after signature
+
+	fin >> noskipws >> trash;
+
+
+	//get duoi file
+	while (fin.peek() != '/')
+	{
+		char temp;
+		fin >> noskipws >> temp;
+		header._duoifile.push_back(temp);
+	}
+	duoifile = header._duoifile;
+	//dipose the last '/'
+	fin >> noskipws >> trash;
 	
 
 	//remove .uzj in zip file
 	string outfilename(filename);
-	for (int i = 0; i < duoifile.size() + 1; i++)
-		outfilename.pop_back();
 
 	//add new .txt, .exe , etc...
 	//name it again
-	outfilename = dir + "\\" + outfilename +  "-decompress." + duoifile;
+	outfilename = dir + "\\" + outfilename;
 
 	ofstream outFILE;
 	outFILE.open(outfilename, ios::binary);
 
 
-	TXTHEADER header;
+	
 
-	//dispose the '/' after signature
-
-	fin >> noskipws >> trash;
+	
 	//get huffman tree size
 	while (fin.peek() != '/')
 	{
@@ -388,7 +397,7 @@ void FolderDecompress(char *infile,string desdir)
 void UZJFileDecompress(char* infile)
 {
 	ifstream inFILE;
-	
+	TXTHEADER header;
 	
 	inFILE.open(infile,ios::binary);
 	if (inFILE.fail())
@@ -397,6 +406,7 @@ void UZJFileDecompress(char* infile)
 		exit(0);
 	}
 	char *tmp = new char[MAX_BUFFER];
+
 	long long length = 0;
 	//lay chu signature txt, exe,cpp ...;
 	string duoifile;
@@ -405,9 +415,21 @@ void UZJFileDecompress(char* infile)
 	for (int i = 0; i < 3; i++)
 	{
 		inFILE >> noskipws >> trash;
-		duoifile.push_back(trash);
 	}
-	checkduoifile(duoifile);
+
+	while (inFILE.peek() != '/')
+	{
+		char temp;
+		inFILE >> noskipws >> temp;
+		header._duoifile.push_back(temp);
+	}
+
+	//dipose the last '/'
+	inFILE >> noskipws >> trash;
+
+
+	duoifile = header._duoifile;
+
 
 	//remove .uzj in zip file
 	string outfilename(infile);
@@ -422,7 +444,7 @@ void UZJFileDecompress(char* infile)
 	outFILE.open(outfilename, ios::binary);
 
 	
-	TXTHEADER header;
+	
 	
 	//dispose the '/' after signature
 
@@ -492,7 +514,7 @@ void UZJFileDecompress(char* infile)
 	int textsize = stoi(header._textsize);
 
 
-	length = textsize + realtextsize;
+	length = stoi(header._numberofcharaftercompress);
 	//rebuild Huffman Tree
 	HTree* root = NULL;
 	rebuildHuffman(saveTree, root);
