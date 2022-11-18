@@ -1,1 +1,4 @@
 
+Project using huffman-compression algorithm to compress files.
+
+Một project dùng thuật toán Huffman để nén files. Có thể nén folder lồng file.
